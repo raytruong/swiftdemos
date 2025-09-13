@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var postFetcher = PostFetcher()
+    @State private var postRepository = PostRepository()
     @State private var posts: [Post] = []
 
     var body: some View {
@@ -53,7 +53,7 @@ struct ContentView: View {
 
     @MainActor
     private func fetchPosts() async {
-        guard let fetchedPosts = try? await postFetcher.fetch() else {
+        guard let fetchedPosts = try? await postRepository.fetch() else {
             return
         }
 
