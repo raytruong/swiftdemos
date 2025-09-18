@@ -13,12 +13,13 @@ struct LetterCombinations {
     ]
 
     static func backtracking(_ digits: String) -> [String] {
-        guard !digits.isEmpty else { return [] }
         var result: [String] = []
 
         func backtrack(remaining: ArraySlice<Character>, path: String) {
             guard let nextDigit = remaining.first else {
-                result.append(path)
+                if !path.isEmpty {
+                    result.append(path)
+                }
                 return
             }
 
