@@ -1,16 +1,15 @@
 import SwiftUI
 
-struct SwiftUICellView: View {
+struct AccordianView: View {
+    @State private var isExpanded: Bool = false
+
     let title: String
     let subtitle: String
-    let isExpanded: Bool
-
-    let onTap: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .top, spacing: 0) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text(title)
                         .font(.headline)
 
@@ -18,35 +17,33 @@ struct SwiftUICellView: View {
                         Text(subtitle)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
-                            .padding(.top, 8)
                     }
                 }
                 Spacer()
-
                 Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                     .foregroundColor(.gray)
             }
             .padding()
         }
         .background(Color(.systemGray6))
-        .cornerRadius(12)
-        .padding(.horizontal, 8)
+        .clipShape(RoundedRectangle(cornerRadius: 16.0))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16.0)
+                .stroke(.black, lineWidth: 1)
+        )
+        .transition(.opacity.combined(with: .scale))
         .onTapGesture {
-            withAnimation {
-                onTap()
+            withAnimation(.snappy(duration: 0.2)) {
+                self.isExpanded.toggle()
             }
         }
-        .transition(.opacity.combined(with: .scale))
     }
 }
 
 #Preview {
-    @Previewable @State var isExpanded: Bool = false
-
-    SwiftUICellView(
+    AccordianView(
         title: "This is the title",
-        subtitle: "this is the subtitle",
-        isExpanded: true,
-        onTap: { isExpanded.toggle() }
+        subtitle: "this is the subtitle"
     )
+    .padding(.horizontal, 8)
 }
