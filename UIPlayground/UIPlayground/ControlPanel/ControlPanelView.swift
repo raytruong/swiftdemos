@@ -77,16 +77,16 @@ class ControlPanelViewModel {
 
         let toggleValue = didTapToggle
             .prepend(isMuted)
-            .removeDuplicates()
 
         let sliderValue = didMoveSlider
             .prepend(volume)
-            .removeDuplicates()
-            .map { Double(Int($0.rounded())) }
 
         let isMuted = toggleValue
+            .removeDuplicates()
 
         let volume = sliderValue
+            .removeDuplicates()
+            .map { Double(Int($0.rounded())) }
 
         let shouldPlaySound = didTapPlay
             .withLatestFrom(isMuted, volume)
