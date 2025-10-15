@@ -104,7 +104,7 @@ class ControlPanelViewModel {
             .store(in: &cancellables)
 
         sliderValue
-            .map { Double($0.rounded()) }
+            .map { Double(Int($0.rounded())) }
             .sink { [weak self] value in
                 guard let self else { return }
                 self.volume = value
