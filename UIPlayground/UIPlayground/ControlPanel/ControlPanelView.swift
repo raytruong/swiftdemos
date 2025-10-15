@@ -82,6 +82,7 @@ class ControlPanelViewModel {
         let sliderValue = didMoveSlider
             .prepend(volume)
             .removeDuplicates()
+            .map { Double(Int($0.rounded())) }
 
         let isMuted = toggleValue
 
@@ -94,33 +95,26 @@ class ControlPanelViewModel {
                 return Int(volume.rounded())
             }
 
-        // MARK: Side effects
-
-        toggleValue
-            .sink { [weak self] value in
-                guard let self else { return }
-                self.isMuted = value
-            }
-            .store(in: &cancellables)
-
-        sliderValue
-            .map { Double(Int($0.rounded())) }
-            .sink { [weak self] value in
-                guard let self else { return }
-                self.volume = value
-            }
-            .store(in: &cancellables)
-
-        shouldPlaySound
+        let audio = shouldPlaySound
             .map { volume -> String in
                 guard let volume else {
                     return ""
                 }
                 return "Ding" + String(repeating: "!", count: max(0, volume))
             }
-            .sink { audio in
-                self.audio = audio
-            }
+
+        // MARK: Side effects
+
+        isMuted
+            .assign(to: \.isMuted, on: self)
+            .store(in: &cancellables)
+
+        volume
+            .assign(to: \.volume, on: self)
+            .store(in: &cancellables)
+
+        audio
+            .assign(to: \.audio, on: self)
             .store(in: &cancellables)
     }
 }
