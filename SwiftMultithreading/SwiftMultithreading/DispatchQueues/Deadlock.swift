@@ -39,5 +39,25 @@ import Playgrounds
         }
     }
 
-    selfReferentialDeadlock()
+
+    func multiQueueDeadlock() {
+        let q1 = DispatchQueue(label: "q1")
+        let q2 = DispatchQueue(label: "q2")
+
+        for i in 0..<1000 {
+            q1.async {
+                q2.sync {
+                    print("requested q2 in q1")
+                }
+            }
+
+            q2.async {
+                q1.sync {
+                    print("requested q1 in q2")
+                }
+            }
+        }
+    }
+
+    multiQueueDeadlock()
 }
