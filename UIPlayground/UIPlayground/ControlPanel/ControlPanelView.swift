@@ -54,7 +54,7 @@ struct ControlPanelView: View {
             .buttonStyle(.borderedProminent)
         }
         .padding()
-        .onAppear { viewModel.setup() }
+        .task { await viewModel.setup() }
     }
 }
 
@@ -72,7 +72,9 @@ class ControlPanelViewModel {
 
     private var cancellables = Set<AnyCancellable>()
 
-    func setup() {
+    let quoteService = QuoteService()
+
+    func setup() async {
         // MARK: Transforms
 
         let toggleValue = didTapToggle
@@ -95,12 +97,15 @@ class ControlPanelViewModel {
                 return Int(volume.rounded())
             }
 
+        let quoteResponse = Just<QuoteResponse?>(try? await quoteService.fetchQuote())
+
         let audio = shouldPlaySound
-            .map { volume -> String in
+            .withLatestFrom(quoteResponse) { ($0, $1) }
+            .map { volume, quote -> String in
                 guard let volume else {
                     return ""
                 }
-                return "Ding" + String(repeating: "!", count: max(0, volume))
+                return "\(quote?.author): Ding" + String(repeating: "!", count: max(0, volume))
             }
 
         // MARK: Side effects
