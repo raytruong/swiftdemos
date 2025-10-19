@@ -3,15 +3,34 @@ import SwiftUI
 import Playgrounds
 
 class AnimatedView: UIView {
-    private lazy var background: UIView = {
-        let background = UIView()
-        background.translatesAutoresizingMaskIntoConstraints = false
-        background.backgroundColor = .red
-        return background
-    }()
-    
-    private lazy var backgroundHeightConstraint: NSLayoutConstraint = {
-        background.heightAnchor.constraint(equalToConstant: 150)
+    private lazy var background: (
+        view: UIView,
+        leading: NSLayoutConstraint,
+        trailing: NSLayoutConstraint,
+        centerY: NSLayoutConstraint,
+        height: NSLayoutConstraint,
+    ) = {
+        // View
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .red
+
+        // Layer
+        view.layer.opacity = 0
+
+        // Constraints
+        let leading = view.leadingAnchor.constraint(equalTo: self.leadingAnchor)
+        let trailing = view.trailingAnchor.constraint(equalTo: self.trailingAnchor)
+        let centerY = view.centerYAnchor.constraint(equalTo: self.centerYAnchor)
+        let height = view.heightAnchor.constraint(equalToConstant: 0)
+
+        return (
+            view,
+            leading,
+            trailing,
+            centerY,
+            height
+        )
     }()
 
     override init(frame: CGRect) {
@@ -24,23 +43,39 @@ class AnimatedView: UIView {
     }
 
     private func setup() {
-        self.addSubview(background)
+        self.addSubview(background.view)
 
         NSLayoutConstraint.activate([
-            background.topAnchor.constraint(equalTo: self.topAnchor),
-            background.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-            background.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-            backgroundHeightConstraint
-//            background.bottomAnchor.constraint(equalTo: self.bottomAnchor)
+            background.leading,
+            background.trailing,
+            background.centerY,
+            background.height
         ])
     }
 
     func animate() {
-        UIView.animate(withDuration: 1) {
-            self.background.backgroundColor = .blue
-            self.backgroundHeightConstraint.constant = 250
-            self.layoutIfNeeded()
-        }
+        // Ensure any pending layout is applied before starting the spring
+        self.layoutIfNeeded()
+
+        UIView.animate(
+            withDuration: 2,
+            delay: 0,
+            usingSpringWithDamping: 1,
+            initialSpringVelocity: 1,
+            options: [
+                .curveEaseInOut,
+                .autoreverse,
+                .repeat
+            ],
+            animations: {
+                self.background.view.layer.opacity = 1
+                self.background.height.constant = 200
+                self.background.leading.constant = 100
+                self.background.trailing.constant = -100
+                self.layoutIfNeeded() // ensures the final layout is fully computed before interpolation
+            },
+            completion: nil
+        )
     }
 }
 
