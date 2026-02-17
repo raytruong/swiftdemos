@@ -3,10 +3,10 @@ import SwiftUI
 import Playgrounds
 
 class AnimatedView: UIView {
+    private let animator = ViewAnimator()
+
     private lazy var background: (
         view: UIView,
-        leading: NSLayoutConstraint,
-        trailing: NSLayoutConstraint,
         centerX: NSLayoutConstraint,
         centerY: NSLayoutConstraint,
         height: NSLayoutConstraint,
@@ -21,8 +21,6 @@ class AnimatedView: UIView {
         view.layer.opacity = 0
 
         // Constraints
-        let leading = view.leadingAnchor.constraint(equalTo: self.leadingAnchor)
-        let trailing = view.trailingAnchor.constraint(equalTo: self.trailingAnchor)
         let centerX = view.centerXAnchor.constraint(equalTo: self.centerXAnchor)
         let centerY = view.centerYAnchor.constraint(equalTo: self.centerYAnchor)
         let height = view.heightAnchor.constraint(equalToConstant: 0)
@@ -30,8 +28,6 @@ class AnimatedView: UIView {
 
         return (
             view,
-            leading,
-            trailing,
             centerX,
             centerY,
             height,
@@ -60,27 +56,15 @@ class AnimatedView: UIView {
     }
 
     func animate() {
-        // Ensure any pending layout is applied before starting
-        self.layoutIfNeeded()
-
-        UIView.animate(
-            withDuration: 2,
-            delay: 0,
-            usingSpringWithDamping: 1,
-            initialSpringVelocity: 1,
-            options: [
-                .curveEaseInOut,
-                .autoreverse,
-                .repeat
-            ],
-            animations: {
-                self.background.view.layer.opacity = 1
-                self.background.height.constant = 200
-                self.background.width.constant = 200
-                self.layoutIfNeeded() // ensures the final layout is fully computed before interpolation
-            },
-            completion: nil
-        )
+        animator.animate(
+            view: self.background.view,
+            parent: self,
+            type: .fadeInGrow(duration: .milliseconds(500))
+        ) {
+            self.background.height.constant = 200
+            self.background.width.constant = 200
+            self.background.view.layer.opacity = 1
+        }
     }
 
 
@@ -109,8 +93,6 @@ class AnimatedView: UIView {
             // Toggle target state for reverse
             let isExpanded = self.background.height.constant == 200
             self.background.height.constant = isExpanded ? 0 : 200
-            self.background.leading.constant = isExpanded ? 0 : 100
-            self.background.trailing.constant = isExpanded ? 0 : -100
             self.background.view.layer.opacity = isExpanded ? 0 : 1
             self.background.view.transform = isExpanded ? .identity : CGAffineTransform(scaleX: 1.1, y: 1.1)
 
